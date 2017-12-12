@@ -1,5 +1,5 @@
 ###
-### Data preparation scripts for three-group CER
+### Data preparation functions for three-group trimming paper
 ################################################################################
 
 ###
