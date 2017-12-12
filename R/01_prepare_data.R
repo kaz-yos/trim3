@@ -408,4 +408,16 @@ prepare_data <- function(data,
                     family = multinomial(parallel = FALSE),
                     ps_prefix = ps_prefix2)
         }))
+
+    ## Add weights
+    nested_df <- nested_df %>%
+        group_by(trim_method_name, thres) %>%
+        mutate(trimmed_data = map(trimmed_data, function(data) {
+            add_all_weights(data = data,
+                            A_name = A_name,
+                            levels = levels,
+                            ps1_prefix = ps1_prefix,
+                            ps2_prefix = ps2_prefix)
+        }))
+
 }
