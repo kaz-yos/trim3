@@ -7,7 +7,7 @@
 ################################################################################
 
 ###   coxph analysis function (unadj, iptw, mw, ow) for anti-diabetics data
-analyze_outcome_glm_log_linear <- function(data, formula, family) {
+analyze_outcome_glm <- function(data, formula, family) {
 
     lst <- list(unadj = try(glm(formula = formula,
                                 family = family,
@@ -23,32 +23,27 @@ analyze_outcome_glm_log_linear <- function(data, formula, family) {
                                 family = family,
                                 data = data,
                                 weights = iptw2,
-                                subset = (keep == 1),
-                                robust = TRUE)),
+                                subset = (keep == 1))),
                 mw1 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = mw1,
-                              subset = (keep == 1),
-                              robust = TRUE)),
+                              subset = (keep == 1))),
                 mw2 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = mw2,
-                              subset = (keep == 1),
-                              robust = TRUE)),
+                              subset = (keep == 1))),
                 ow1 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = ow1,
-                              subset = (keep == 1),
-                              robust = TRUE)),
+                              subset = (keep == 1))),
                 ow2 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = ow2,
-                              subset = (keep == 1),
-                              robust = TRUE))
+                              subset = (keep == 1)))
                 )
 
     data_frame(adjustment = names(lst),
@@ -57,12 +52,14 @@ analyze_outcome_glm_log_linear <- function(data, formula, family) {
 
 
 ###   Calculate estimate, SE, CI for coxph object (robust se is used if available via vcov())
-calc_coxph_est_ci <- function(coxph_obj) {
-    coefs <- coef(coxph_obj)
-    ses <- sqrt(diag(vcov(coxph_obj)))
+calc_est_ci <- function(model, vcov_fun, alpha) {
+    ## Coefficients
+    coefs <- coef(model)
+    ## Standard errors using vcov_fun.
+    ses <- sqrt(diag(vcov_fun(model)))
     data_frame(contrast = names(coefs),
                coef = coefs,
                se = ses,
-               lower = coefs - qnorm(p = 0.975) * ses,
-               upper = coefs + qnorm(p = 0.975) * ses)
+               lower = coefs - qnorm(p = 1 - alpha / 2) * ses,
+               upper = coefs + qnorm(p = 1 - alpha / 2) * ses)
 }
