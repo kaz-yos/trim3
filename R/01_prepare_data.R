@@ -420,4 +420,9 @@ prepare_data <- function(data,
                             ps2_prefix = ps2_prefix)
         }))
 
+    ## Add matching id
+
+
+    ## Return nested df indexed by trimming methods.
+    return(nested_df)
 }
