@@ -1,0 +1,19 @@
+Package: trim3
+Title: Conduct three-group trimming study
+Version: 0.1.0
+Authors: Kazuki Yoshida
+Description: What the package does (one paragraph).
+Depends: R (>= 3.4.1)
+Imports:
+    MASS,
+    tidyverse,
+    assertthat,
+    foreach,
+    doRNG,
+    locfit
+Suggests:
+    testthat
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
