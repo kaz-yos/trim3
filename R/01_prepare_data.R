@@ -84,6 +84,20 @@ add_gps <- function(data,
 ################################################################################
 
 ###   None (a dummy function to return 1's)
+##' Dummy function to conduct no trimming at all.
+##'
+##' .. content for details ..
+##'
+##' @param A Treatment indicator vector having three levels indicated in \code{levels}.
+##' @param ps0 PS vector for the first level.
+##' @param ps1 PS vector for the second level.
+##' @param ps2 PS vector for the third level.
+##' @param levels Character vector holding three elements corresponding to levels in \code{A}
+##' @param thres Threshold for the trimming strategy.
+##'
+##' @return A numeric indicator vector. 1 for kept and 0 for dropped.
+##'
+##' @export
 trim_none <- function(A, ps0, ps1, ps2, levels, thres) {
     ## All of them has to be in [thres, 1.0].
     ## Treatment vector is not used.
@@ -91,7 +105,15 @@ trim_none <- function(A, ps0, ps1, ps2, levels, thres) {
 }
 
 ###   Crump
-## Receive three PS, return "keep" indicator
+##' Crump trimming function
+##'
+##' .. content for details ..
+##'
+##' @inheritParams trim_none
+##'
+##' @return A numeric indicator vector. 1 for kept and 0 for dropped.
+##'
+##' @export
 trim_crump <- function(A, ps0, ps1, ps2, levels, thres) {
     ## All of them has to be in [thres, 1.0].
     ## Treatment vector is not used.
@@ -99,6 +121,15 @@ trim_crump <- function(A, ps0, ps1, ps2, levels, thres) {
 }
 
 ###   Sturmer
+##' Sturmer trimming function
+##'
+##' .. content for details ..
+##'
+##' @inheritParams trim_none
+##'
+##' @return A numeric indicator vector. 1 for kept and 0 for dropped.
+##'
+##' @export
 trim_sturmer <- function(A, ps0, ps1, ps2, levels, thres) {
 
     ## Calculate the lower bounds as thres-quantile in respective group.
@@ -115,6 +146,15 @@ trim_sturmer <- function(A, ps0, ps1, ps2, levels, thres) {
 }
 
 ###   Walker
+##' Walker trimming function
+##'
+##' .. content for details ..
+##'
+##' @inheritParams trim_none
+##'
+##' @return A numeric indicator vector. 1 for kept and 0 for dropped.
+##'
+##' @export
 trim_walker <- function(A, ps0, ps1, ps2, levels, thres) {
 
     ## Prevalence of treatment
@@ -132,6 +172,22 @@ trim_walker <- function(A, ps0, ps1, ps2, levels, thres) {
 }
 
 ###   Generic trimming function (returns data with keep vector enclosed in a list)
+##' Dummy function to conduct no trimming at all.
+##'
+##' .. content for details ..
+##'
+##' @param data data_frame
+##' @param trim_method
+##' @param thres Threshold for the trimming strategy.
+##' @param A_name Treatment indicator name in \code{data}.
+##' @param ps0_name Name of the column in \code{data} for the PS for the first level.
+##' @param ps1_name Name of the column in \code{data} for the PS for the second level.
+##' @param ps2_name Name of the column in \code{data} for the PS for the third level.
+##' @param levels Character vector holding three elements corresponding to levels in \code{A}
+##'
+##' @return trimmed data_frame with fewer rows
+##'
+##' @export
 trim_data <- function(data, trim_method, thres,
                       A_name, ps0_name, ps1_name, ps2_name,
                       levels) {
@@ -148,7 +204,9 @@ trim_data <- function(data, trim_method, thres,
     data <- data %>%
         filter(keep == 1)
 
-    list(data)
+    ## It was a singleton list with data_frame for the empirical analyses.
+    ## list(data)
+    data
 }
 
 
