@@ -24,7 +24,7 @@ add_gps <- function(data,
                     formula,
                     family = multinomial(parallel = FALSE),
                     subset,
-                    ps_prefix = "ps_") {
+                    ps_prefix) {
     assert_that("data.frame" %in% class(data))
     assert_that(class(formula) == "formula")
     assert_that(is.character(ps_prefix))
@@ -177,7 +177,7 @@ trim_walker <- function(A, ps0, ps1, ps2, levels, thres) {
 ##' .. content for details ..
 ##'
 ##' @param data data_frame
-##' @param trim_method Function used for trimming that takes \code{A}, \code{ps0}, \code{ps1}, \code{ps2}, \code{levels}, and \code{thres} as arguments. Either one of \code{\link{trim_none}}, \code{\link{trim_crump}}, \code{\link{trim_sturmer}}, \code{\link{trim_walker}}.
+##' @param trim_method_name Function used for trimming that takes \code{A}, \code{ps0}, \code{ps1}, \code{ps2}, \code{levels}, and \code{thres} as arguments. Either one of the string: \code{\link{none}}, \code{\link{crump}}, \code{\link{sturmer}}, \code{\link{walker}}.
 ##' @param thres Threshold for the trimming strategy.
 ##' @param A_name Treatment indicator name in \code{data}.
 ##' @param ps0_name Name of the column in \code{data} for the PS for the first level.
@@ -188,7 +188,7 @@ trim_walker <- function(A, ps0, ps1, ps2, levels, thres) {
 ##' @return trimmed data_frame with fewer rows
 ##'
 ##' @export
-trim_data <- function(data, trim_method, thres,
+trim_data <- function(data, trim_method_name, thres,
                       A_name, ps0_name, ps1_name, ps2_name,
                       levels) {
 
@@ -330,11 +330,75 @@ add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefi
 ##'
 ##' Takes a data_frame and
 ##'
+##' @param data data_frame
+##' @param formula1 PS model formula for the entire cohort estimation.
+##' @param family PS model family
+##' @param ps_prefix1 PS variable prefix for the entire cohort estimation
+##' @param ps_prefix2 PS variable prefix for the trimmed cohort estimation
+##' @param df_trim_thres data_frame with columns \code{trim_method_name} and \code{thres} to indicate
+##' @param A_name
+##' @param ps0_name
+##' @param ps1_name
+##' @param ps2_name
+##' @param levels
 ##' @param data_frame for one iteration
 ##'
 ##' @return nested data_frame containing
 ##'
 ##' @export
-prepare_data <- function(data) {
+prepare_data <- function(data,
+                         formula1,
+                         family,
+                         ps_prefix1,
+                         ps_prefix2,
+                         df_trim_thres = tribble(
+                             ~trim_method_name, ~thres,
+                             "none", 0,
+                             "crump", 0.1,
+                             "crump", 0.07,
+                             "crump", 0.03,
+                             "sturmer", 0.05,
+                             "sturmer", 0.033,
+                             "sturmer", 0.015,
+                             "walker", 0.30,
+                             "walker", 0.20,
+                             "walker", 0.10),
+                         A_name,
+                         ps0_name,
+                         ps1_name,
+                         ps2_name,
+                         levels) {
 
+    ## Add first-step GPS based on the entire cohort.
+    data <- add_gps(data = data,
+                    formula = formula1,
+                    family = multinomial(parallel = FALSE),
+                    ps_prefix = ps_prefix1)
+
+    ## Trimming method and threshold configuration
+    df_trim_thres <- tribble(
+        ~trim_method_name, ~thres,
+        "none", 0,
+        "crump", 0.1,
+        "crump", 0.07,
+        "crump", 0.03,
+        "sturmer", 0.05,
+        "sturmer", 0.033,
+        "sturmer", 0.015,
+        "walker", 0.30,
+        "walker", 0.20,
+        "walker", 0.10)
+
+    ## Trim data by various methods and hold in a nested data frame
+    nested_df <- df_trim_thres %>%
+        group_by(trim_method_name, thres) %>%
+        mutate(trimmed_data = trim_data(data = data,
+                                        ## String is used to retrieve the right function.
+                                        trim_method_name = trim_method_name,
+                                        thres = thres,
+                                        A_name = A_name,
+                                        ps0_name = ps0_name,
+                                        ps1_name = ps1_name,
+                                        ps2_name = ps2_name,
+                                        levels = levels))
 }
