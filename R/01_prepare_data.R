@@ -7,9 +7,9 @@
 ################################################################################
 
 ###  Generalized PS Function
-##' .. content for \description{} (no empty lines) ..
+##' Add generalized PS
 ##'
-##' .. content for \details{} ..
+##' .. content for details ..
 ##'
 ##' @param data data_frame
 ##' @param formula formula for PS model
@@ -83,10 +83,159 @@ add_gps <- function(data,
 ### Functions for PS trimming
 ################################################################################
 
+###   None (a dummy function to return 1's)
+trim_none <- function(A, ps0, ps1, ps2, levels, thres) {
+    ## All of them has to be in [thres, 1.0].
+    ## Treatment vector is not used.
+    as.numeric(rep(1, length(ps0)))
+}
+
+###   Crump
+## Receive three PS, return "keep" indicator
+trim_crump <- function(A, ps0, ps1, ps2, levels, thres) {
+    ## All of them has to be in [thres, 1.0].
+    ## Treatment vector is not used.
+    as.numeric(ps0 >= thres & ps1 >= thres & ps2 >= thres)
+}
+
+###   Sturmer
+trim_sturmer <- function(A, ps0, ps1, ps2, levels, thres) {
+
+    ## Calculate the lower bounds as thres-quantile in respective group.
+    l0 <- quantile(ps0[A == levels[1]], prob = thres)
+    l1 <- quantile(ps1[A == levels[2]], prob = thres)
+    l2 <- quantile(ps2[A == levels[3]], prob = thres)
+
+    ## All three must be satisfied
+    result <- as.numeric(ps0 >= l0 & ps1 >= l1 & ps2 >= l2)
+
+    attributes(result) <- list(bounds = c(l0, l1, l2))
+
+    result
+}
+
+###   Walker
+trim_walker <- function(A, ps0, ps1, ps2, levels, thres) {
+
+    ## Prevalence of treatment
+    p0 <- mean(A == levels[1])
+    p1 <- mean(A == levels[2])
+    p2 <- mean(A == levels[3])
+
+    ## Preference scores
+    pi0 <- (ps0 / p0) / ((ps0 / p0) + (ps1 / p1) + (ps2 / p2))
+    pi1 <- (ps1 / p1) / ((ps0 / p0) + (ps1 / p1) + (ps2 / p2))
+    pi2 <- (ps2 / p2) / ((ps0 / p0) + (ps1 / p1) + (ps2 / p2))
+
+    ## All three must be satisfied
+    as.numeric(pi0 >= thres & pi1 >= thres & pi2 >= thres)
+}
+
+###   Generic trimming function (returns data with keep vector enclosed in a list)
+trim_data <- function(data, trim_method, thres,
+                      A_name, ps0_name, ps1_name, ps2_name,
+                      levels) {
+
+    trim_fun <- get(paste0("trim_", trim_method))
+
+    data$keep <- trim_fun(A   = unlist(data[,A_name]),
+                          ps0 = unlist(data[,ps0_name]),
+                          ps1 = unlist(data[,ps1_name]),
+                          ps2 = unlist(data[,ps2_name]),
+                          levels = levels,
+                          thres = thres)
+
+    data <- data %>%
+        filter(keep == 1)
+
+    list(data)
+}
+
 
 ###
 ### Functions for PS weighting
 ################################################################################
+
+###   Return one type of weight
+add_weight <- function(A, ps0, ps1, ps2, levels, weight_type) {
+
+    iptw <- (1/ps0 * (A == levels[1])) + (1/ps1 * (A == levels[2])) + (1/ps2 * (A == levels[3]))
+
+    if (weight_type == "iptw") {
+        ## IPTW
+        return(iptw)
+
+    } else if (weight_type == "mw") {
+        ## Matching weights (MW)
+        return(pmin(ps0, ps1, ps2) * iptw)
+
+    } else if (weight_type == "ow") {
+        ## Overlap weights (OW)
+        return((ps0 * ps1 * ps2) * iptw)
+
+    } else {
+        stop("Invalid option for weight_type: ", weight_type)
+
+    }
+}
+
+###   Add all weights
+add_all_weights <- function(df, A_name, levels) {
+
+    ps1_names <- paste0("ps1_", levels)
+
+    df$iptw1 <- NA
+    df[df$keep == 1,]$iptw1 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
+                                          ps0 = unlist(df[df$keep == 1, ps1_names[1]]),
+                                          ps1 = unlist(df[df$keep == 1, ps1_names[2]]),
+                                          ps2 = unlist(df[df$keep == 1, ps1_names[3]]),
+                                          levels = levels,
+                                          weight_type = "iptw")
+    df$mw1 <- NA
+    df[df$keep == 1,]$mw1 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
+                                        ps0 = unlist(df[df$keep == 1, ps1_names[1]]),
+                                        ps1 = unlist(df[df$keep == 1, ps1_names[2]]),
+                                        ps2 = unlist(df[df$keep == 1, ps1_names[3]]),
+                                        levels = levels,
+                                        weight_type = "mw")
+    df$ow1 <- NA
+    df[df$keep == 1,]$ow1 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
+                                        ps0 = unlist(df[df$keep == 1, ps1_names[1]]),
+                                        ps1 = unlist(df[df$keep == 1, ps1_names[2]]),
+                                        ps2 = unlist(df[df$keep == 1, ps1_names[3]]),
+                                        levels = levels,
+                                        weight_type = "ow")
+
+    ps2_names <- paste0("ps2_", levels)
+    ## Proceed if ps2_* are all available
+    if (all(ps2_names %in% names(df))) {
+
+        df$iptw2 <- NA
+        df[df$keep == 1,]$iptw2 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
+                                              ps0 = unlist(df[df$keep == 1, ps2_names[1]]),
+                                              ps1 = unlist(df[df$keep == 1, ps2_names[2]]),
+                                              ps2 = unlist(df[df$keep == 1, ps2_names[3]]),
+                                              levels = levels,
+                                              weight_type = "iptw")
+        df$mw2 <- NA
+        df[df$keep == 1,]$mw2 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
+                                            ps0 = unlist(df[df$keep == 1, ps2_names[1]]),
+                                            ps1 = unlist(df[df$keep == 1, ps2_names[2]]),
+                                            ps2 = unlist(df[df$keep == 1, ps2_names[3]]),
+                                            levels = levels,
+                                            weight_type = "mw")
+        df$ow2 <- NA
+        df[df$keep == 1,]$ow2 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
+                                            ps0 = unlist(df[df$keep == 1, ps2_names[1]]),
+                                            ps1 = unlist(df[df$keep == 1, ps2_names[2]]),
+                                            ps2 = unlist(df[df$keep == 1, ps2_names[3]]),
+                                            levels = levels,
+                                            weight_type = "ow")
+
+    }
+    ## Return df in the end
+    return(df)
+}
 
 
 ###
