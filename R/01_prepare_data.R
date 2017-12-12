@@ -364,9 +364,6 @@ prepare_data <- function(data,
                              "walker", 0.20,
                              "walker", 0.10),
                          A_name,
-                         ps0_name,
-                         ps1_name,
-                         ps2_name,
                          levels) {
 
     ## Add first-step GPS based on the entire cohort.
@@ -397,8 +394,18 @@ prepare_data <- function(data,
                                         trim_method_name = trim_method_name,
                                         thres = thres,
                                         A_name = A_name,
-                                        ps0_name = ps0_name,
-                                        ps1_name = ps1_name,
-                                        ps2_name = ps2_name,
+                                        ps0_name = paste0(ps_prefix1, levels)[1],
+                                        ps1_name = paste0(ps_prefix1, levels)[2],
+                                        ps2_name = paste0(ps_prefix1, levels)[3],
                                         levels = levels))
+
+    ## Conduct PS re-estimation within each trimmed cohort.
+    nested_df <- nested_df %>%
+        group_by(trim_method_name, thres) %>%
+        mutate(trimmed_data = map(trimmed_data, function(data) {
+            add_gps(data = data,
+                    formula = formula2,
+                    family = multinomial(parallel = FALSE),
+                    ps_prefix = ps_prefix2)
+        }))
 }
