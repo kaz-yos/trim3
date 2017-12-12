@@ -177,7 +177,7 @@ trim_walker <- function(A, ps0, ps1, ps2, levels, thres) {
 ##' .. content for details ..
 ##'
 ##' @param data data_frame
-##' @param trim_method
+##' @param trim_method Function used for trimming that takes \code{A}, \code{ps0}, \code{ps1}, \code{ps2}, \code{levels}, and \code{thres} as arguments. Either one of \code{\link{trim_none}}, \code{\link{trim_crump}}, \code{\link{trim_sturmer}}, \code{\link{trim_walker}}.
 ##' @param thres Threshold for the trimming strategy.
 ##' @param A_name Treatment indicator name in \code{data}.
 ##' @param ps0_name Name of the column in \code{data} for the PS for the first level.
@@ -215,7 +215,17 @@ trim_data <- function(data, trim_method, thres,
 ################################################################################
 
 ###   Return one type of weight
-add_weight <- function(A, ps0, ps1, ps2, levels, weight_type) {
+##' Calculate one type of PS weight given PS
+##'
+##' .. content for details ..
+##'
+##' @inheritParams trim_none
+##' @param weight_type Either one of \code{iptw}, \code{mw}, and \code{ow}.
+##'
+##' @return A numeric vector of individual PS weights.
+##'
+##' @export
+calculate_weight <- function(A, ps0, ps1, ps2, levels, weight_type) {
 
     iptw <- (1/ps0 * (A == levels[1])) + (1/ps1 * (A == levels[2])) + (1/ps2 * (A == levels[3]))
 
@@ -238,61 +248,73 @@ add_weight <- function(A, ps0, ps1, ps2, levels, weight_type) {
 }
 
 ###   Add all weights
-add_all_weights <- function(df, A_name, levels) {
+##' Calculate one type of PS weight given PS
+##'
+##' .. content for details ..
+##'
+##' @inheritParams trim_none
+##' @param data data_frame
+##' @param ps1_prefix Prefix for the PS estimated in the entire cohort.
+##' @param ps2_prefix Prefix for the PS estimated in the trimmed cohort.
+##'
+##' @return data_frame containing IPTW, MW, and OW estimated in the entire cohort as well as the trimmed cohort.
+##'
+##' @export
+add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefix = "ps2_") {
 
     ps1_names <- paste0("ps1_", levels)
 
-    df$iptw1 <- NA
-    df[df$keep == 1,]$iptw1 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
-                                          ps0 = unlist(df[df$keep == 1, ps1_names[1]]),
-                                          ps1 = unlist(df[df$keep == 1, ps1_names[2]]),
-                                          ps2 = unlist(df[df$keep == 1, ps1_names[3]]),
+    data$iptw1 <- NA
+    data[data$keep == 1,]$iptw1 <- add_weight(A = unlist(data[data$keep == 1, A_name]),
+                                          ps0 = unlist(data[data$keep == 1, ps1_names[1]]),
+                                          ps1 = unlist(data[data$keep == 1, ps1_names[2]]),
+                                          ps2 = unlist(data[data$keep == 1, ps1_names[3]]),
                                           levels = levels,
                                           weight_type = "iptw")
-    df$mw1 <- NA
-    df[df$keep == 1,]$mw1 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
-                                        ps0 = unlist(df[df$keep == 1, ps1_names[1]]),
-                                        ps1 = unlist(df[df$keep == 1, ps1_names[2]]),
-                                        ps2 = unlist(df[df$keep == 1, ps1_names[3]]),
+    data$mw1 <- NA
+    data[data$keep == 1,]$mw1 <- add_weight(A = unlist(data[data$keep == 1, A_name]),
+                                        ps0 = unlist(data[data$keep == 1, ps1_names[1]]),
+                                        ps1 = unlist(data[data$keep == 1, ps1_names[2]]),
+                                        ps2 = unlist(data[data$keep == 1, ps1_names[3]]),
                                         levels = levels,
                                         weight_type = "mw")
-    df$ow1 <- NA
-    df[df$keep == 1,]$ow1 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
-                                        ps0 = unlist(df[df$keep == 1, ps1_names[1]]),
-                                        ps1 = unlist(df[df$keep == 1, ps1_names[2]]),
-                                        ps2 = unlist(df[df$keep == 1, ps1_names[3]]),
+    data$ow1 <- NA
+    data[data$keep == 1,]$ow1 <- add_weight(A = unlist(data[data$keep == 1, A_name]),
+                                        ps0 = unlist(data[data$keep == 1, ps1_names[1]]),
+                                        ps1 = unlist(data[data$keep == 1, ps1_names[2]]),
+                                        ps2 = unlist(data[data$keep == 1, ps1_names[3]]),
                                         levels = levels,
                                         weight_type = "ow")
 
     ps2_names <- paste0("ps2_", levels)
     ## Proceed if ps2_* are all available
-    if (all(ps2_names %in% names(df))) {
+    if (all(ps2_names %in% names(data))) {
 
-        df$iptw2 <- NA
-        df[df$keep == 1,]$iptw2 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
-                                              ps0 = unlist(df[df$keep == 1, ps2_names[1]]),
-                                              ps1 = unlist(df[df$keep == 1, ps2_names[2]]),
-                                              ps2 = unlist(df[df$keep == 1, ps2_names[3]]),
+        data$iptw2 <- NA
+        data[data$keep == 1,]$iptw2 <- add_weight(A = unlist(data[data$keep == 1, A_name]),
+                                              ps0 = unlist(data[data$keep == 1, ps2_names[1]]),
+                                              ps1 = unlist(data[data$keep == 1, ps2_names[2]]),
+                                              ps2 = unlist(data[data$keep == 1, ps2_names[3]]),
                                               levels = levels,
                                               weight_type = "iptw")
-        df$mw2 <- NA
-        df[df$keep == 1,]$mw2 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
-                                            ps0 = unlist(df[df$keep == 1, ps2_names[1]]),
-                                            ps1 = unlist(df[df$keep == 1, ps2_names[2]]),
-                                            ps2 = unlist(df[df$keep == 1, ps2_names[3]]),
+        data$mw2 <- NA
+        data[data$keep == 1,]$mw2 <- add_weight(A = unlist(data[data$keep == 1, A_name]),
+                                            ps0 = unlist(data[data$keep == 1, ps2_names[1]]),
+                                            ps1 = unlist(data[data$keep == 1, ps2_names[2]]),
+                                            ps2 = unlist(data[data$keep == 1, ps2_names[3]]),
                                             levels = levels,
                                             weight_type = "mw")
-        df$ow2 <- NA
-        df[df$keep == 1,]$ow2 <- add_weight(A = unlist(df[df$keep == 1, A_name]),
-                                            ps0 = unlist(df[df$keep == 1, ps2_names[1]]),
-                                            ps1 = unlist(df[df$keep == 1, ps2_names[2]]),
-                                            ps2 = unlist(df[df$keep == 1, ps2_names[3]]),
+        data$ow2 <- NA
+        data[data$keep == 1,]$ow2 <- add_weight(A = unlist(data[data$keep == 1, A_name]),
+                                            ps0 = unlist(data[data$keep == 1, ps2_names[1]]),
+                                            ps1 = unlist(data[data$keep == 1, ps2_names[2]]),
+                                            ps2 = unlist(data[data$keep == 1, ps2_names[3]]),
                                             levels = levels,
                                             weight_type = "ow")
 
     }
-    ## Return df in the end
-    return(df)
+    ## Return data in the end
+    return(data)
 }
 
 
