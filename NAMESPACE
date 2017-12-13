@@ -2,7 +2,9 @@
 
 export(add_all_weights)
 export(add_gps)
+export(analyze_outcome_glm)
 export(calculate_weight)
+export(prepare_data)
 export(trim_crump)
 export(trim_data)
 export(trim_none)

@@ -25,10 +25,10 @@ add_gps <- function(data,
                     family = multinomial(parallel = FALSE),
                     subset,
                     ps_prefix) {
-    assert_that("data.frame" %in% class(data))
-    assert_that(class(formula) == "formula")
-    assert_that(is.character(ps_prefix))
-    assert_that(length(ps_prefix) == 1)
+    assertthat::assert_that("data.frame" %in% class(data))
+    assertthat::assert_that(class(formula) == "formula")
+    assertthat::assert_that(is.character(ps_prefix))
+    assertthat::assert_that(length(ps_prefix) == 1)
 
     ## Logical
     if (missing(subset)) {
@@ -336,12 +336,11 @@ add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefi
 ##' @param ps_prefix1 PS variable prefix for the entire cohort estimation
 ##' @param ps_prefix2 PS variable prefix for the trimmed cohort estimation
 ##' @param df_trim_thres data_frame with columns \code{trim_method_name} and \code{thres} to indicate
-##' @param A_name
-##' @param ps0_name
-##' @param ps1_name
-##' @param ps2_name
-##' @param levels
-##' @param data_frame for one iteration
+##' @param A_name Treatment indicator name in \code{data}.
+##' @param ps0_name Name of the column in \code{data} for the PS for the first level.
+##' @param ps1_name Name of the column in \code{data} for the PS for the second level.
+##' @param ps2_name Name of the column in \code{data} for the PS for the third level.
+##' @param levels Character vector holding three elements corresponding to levels in \code{A}
 ##'
 ##' @return nested data_frame containing
 ##'
