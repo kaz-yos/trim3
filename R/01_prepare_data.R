@@ -365,15 +365,16 @@ prepare_data <- function(data,
     ## Trim data by various methods and hold in a nested data frame
     nested_df <- df_trim_thres %>%
         group_by(trim_method_name, thres) %>%
-        mutate(trimmed_data = trim_data(data = data,
-                                        ## String is used to retrieve the right function.
-                                        trim_method_name = trim_method_name,
-                                        thres = thres,
-                                        A_name = A_name,
-                                        ps0_name = paste0(ps_prefix1, levels)[1],
-                                        ps1_name = paste0(ps_prefix1, levels)[2],
-                                        ps2_name = paste0(ps_prefix1, levels)[3],
-                                        levels = levels))
+        ## Put it in a list column.
+        mutate(trimmed_data = list(trim_data(data = data,
+                                             ## String is used to retrieve the right function.
+                                             trim_method_name = trim_method_name,
+                                             thres = thres,
+                                             A_name = A_name,
+                                             ps0_name = paste0(ps_prefix1, levels)[1],
+                                             ps1_name = paste0(ps_prefix1, levels)[2],
+                                             ps2_name = paste0(ps_prefix1, levels)[3],
+                                             levels = levels)))
 
     ## Conduct PS re-estimation within each trimmed cohort.
     nested_df <- nested_df %>%
