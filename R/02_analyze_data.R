@@ -11,7 +11,7 @@
 ##'
 ##' .. content for details ..
 ##'
-##' @param data data_frame assumed to be trimmed already.
+##' @param data data_frame which is assumed to have been trimmed already. It has to contain weight variables (\code{iptw1}, \code{iptw2}, \code{mw1}, \code{mw2}, \code{ow1}, and \code{ow2})
 ##' @param formula
 ##' @param family
 ##'
