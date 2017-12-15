@@ -22,9 +22,10 @@
 ##' @export
 add_gps <- function(data,
                     formula,
-                    family = VGAM::multinomial(parallel = FALSE),
+                    family,
                     subset,
                     ps_prefix) {
+
     assertthat::assert_that("data.frame" %in% class(data))
     assertthat::assert_that(class(formula) == "formula")
     assertthat::assert_that(is.character(ps_prefix))
@@ -63,7 +64,7 @@ add_gps <- function(data,
     } else {
 
         ## Calculate PS for all groups.
-        ps_data <- as_data_frame(predict(res_vglm, newdata = data[subset_logical,], type = "response"))
+        ps_data <- as_data_frame(VGAM::predict(res_vglm, newdata = data[subset_logical,], type = "response"))
         ## Add prefix
         names(ps_data) <- paste0(ps_prefix, names(ps_data))
         ##
@@ -347,21 +348,11 @@ add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefi
 ##' @export
 prepare_data <- function(data,
                          formula1,
+                         formula2,
                          family,
                          ps_prefix1,
                          ps_prefix2,
-                         df_trim_thres = tribble(
-                             ~trim_method_name, ~thres,
-                             "none", 0,
-                             "crump", 0.1,
-                             "crump", 0.07,
-                             "crump", 0.03,
-                             "sturmer", 0.05,
-                             "sturmer", 0.033,
-                             "sturmer", 0.015,
-                             "walker", 0.30,
-                             "walker", 0.20,
-                             "walker", 0.10),
+                         df_trim_thres,
                          A_name,
                          levels) {
 
@@ -370,20 +361,6 @@ prepare_data <- function(data,
                     formula = formula1,
                     family = family,
                     ps_prefix = ps_prefix1)
-
-    ## Trimming method and threshold configuration
-    df_trim_thres <- tribble(
-        ~trim_method_name, ~thres,
-        "none", 0,
-        "crump", 0.1,
-        "crump", 0.07,
-        "crump", 0.03,
-        "sturmer", 0.05,
-        "sturmer", 0.033,
-        "sturmer", 0.015,
-        "walker", 0.30,
-        "walker", 0.20,
-        "walker", 0.10)
 
     ## Trim data by various methods and hold in a nested data frame
     nested_df <- df_trim_thres %>%
