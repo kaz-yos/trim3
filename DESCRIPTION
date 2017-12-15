@@ -10,7 +10,8 @@ Imports:
     assertthat,
     foreach,
     doRNG,
-    VGAM
+    VGAM,
+    sandwich
 Suggests:
     testthat
 License: What license is it under?

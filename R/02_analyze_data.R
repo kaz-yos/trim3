@@ -6,6 +6,15 @@
 ### Outcome analysis function
 ################################################################################
 
+coef_and_vcov <- function(model, vcov_fun) {
+
+    coef_vector <- coef(model)
+    vcov_matrix <- vcov_fun(model)
+
+    list(coef = coef_vector,
+         vcov = vcov_matrix)
+}
+
 ###   glm outcome analysis function.
 ##' Analyze outcome using glm
 ##'
@@ -15,54 +24,51 @@
 ##' @param formula outcome analysis formula. It should only contain the outcome and the exposure of interest.
 ##' @param family \code{glm} family statement.
 ##'
-##' @return data_frame with an adjustment method column and a model fit list column.
+##' @return data_frame with an adjustment method column and list columns for the coefficient and variance-covariance matrix (robust one for weighted data).
 ##'
 ##' @export
 analyze_outcome_glm <- function(data, formula, family) {
 
-    ## model = FALSE, x = FALSE, y = TRUE
-    ## a logical value indicating whether _model frame_ should be kept.
-    ## Drop the model frame to save space.
-
-    lst <- list(unadj = try(glm(formula = formula,
-                                family = family,
-                                data = data,
-                                model = FALSE, x = FALSE, y = FALSE)),
-                iptw1 = try(glm(formula = formula,
-                                family = family,
-                                data = data,
-                                weights = iptw1,
-                                model = FALSE, x = FALSE, y = FALSE)),
-                iptw2 = try(glm(formula = formula,
-                                family = family,
-                                data = data,
-                                weights = iptw2,
-                                model = FALSE, x = FALSE, y = FALSE)),
-                mw1 = try(glm(formula = formula,
-                              family = family,
-                              data = data,
-                              weights = mw1,
-                              model = FALSE, x = FALSE, y = FALSE)),
-                mw2 = try(glm(formula = formula,
-                              family = family,
-                              data = data,
-                              weights = mw2,
-                              model = FALSE, x = FALSE, y = FALSE)),
-                ow1 = try(glm(formula = formula,
-                              family = family,
-                              data = data,
-                              weights = ow1,
-                              model = FALSE, x = FALSE, y = FALSE)),
-                ow2 = try(glm(formula = formula,
-                              family = family,
-                              data = data,
-                              weights = ow2,
-                              model = FALSE, x = FALSE, y = FALSE))
+    lst <- list(unadj = try(coef_and_vcov(glm(formula = formula,
+                                              family = family,
+                                              data = data),
+                                          vcov_fun = vcov)),
+                iptw1 = try(coef_and_vcov(glm(formula = formula,
+                                              family = family,
+                                              data = data,
+                                              weights = iptw1),
+                                          vcov_fun = sandwich::sandwich)),
+                iptw2 = try(coef_and_vcov(glm(formula = formula,
+                                              family = family,
+                                              data = data,
+                                              weights = iptw2),
+                                          vcov_fun = sandwich::sandwich)),
+                mw1 = try(coef_and_vcov(glm(formula = formula,
+                                            family = family,
+                                            data = data,
+                                            weights = mw1),
+                                        vcov_fun = sandwich::sandwich)),
+                mw2 = try(coef_and_vcov(glm(formula = formula,
+                                            family = family,
+                                            data = data,
+                                            weights = mw2),
+                                        vcov_fun = sandwich::sandwich)),
+                ow1 = try(coef_and_vcov(glm(formula = formula,
+                                            family = family,
+                                            data = data,
+                                            weights = ow1),
+                                        vcov_fun = sandwich::sandwich)),
+                ow2 = try(coef_and_vcov(glm(formula = formula,
+                                            family = family,
+                                            data = data,
+                                            weights = ow2),
+                                        vcov_fun = sandwich::sandwich))
                 )
 
     data_frame(adjustment = names(lst),
                ## List column
-               model = lst)
+               coef = lapply(lst, `[[`, "coef"),
+               vcov = lapply(lst, `[[`, "vcov"))
 }
 
 
