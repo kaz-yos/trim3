@@ -6,14 +6,14 @@
 ### Outcome analysis function
 ################################################################################
 
-###   coxph analysis function (unadj, iptw, mw, ow) for anti-diabetics data
+###   glm outcome analysis function.
 ##' Analyze outcome using glm
 ##'
 ##' .. content for details ..
 ##'
 ##' @param data data_frame which is assumed to have been trimmed already. It has to contain weight variables (\code{iptw1}, \code{iptw2}, \code{mw1}, \code{mw2}, \code{ow1}, and \code{ow2})
-##' @param formula
-##' @param family
+##' @param formula outcome analysis formula. It should only contain the outcome and the exposure of interest.
+##' @param family \code{glm} family statement.
 ##'
 ##' @return data_frame with an adjustment method column and a model fit list column.
 ##'
