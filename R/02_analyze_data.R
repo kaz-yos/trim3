@@ -20,44 +20,44 @@
 ##' @export
 analyze_outcome_glm <- function(data, formula, family) {
 
-    ## model = FALSE
+    ## model = FALSE, x = FALSE, y = TRUE
     ## a logical value indicating whether _model frame_ should be kept.
     ## Drop the model frame to save space.
 
     lst <- list(unadj = try(glm(formula = formula,
                                 family = family,
                                 data = data,
-                                model = FALSE)),
+                                model = FALSE, x = FALSE, y = FALSE)),
                 iptw1 = try(glm(formula = formula,
                                 family = family,
                                 data = data,
                                 weights = iptw1,
-                                model = FALSE)),
+                                model = FALSE, x = FALSE, y = FALSE)),
                 iptw2 = try(glm(formula = formula,
                                 family = family,
                                 data = data,
                                 weights = iptw2,
-                                model = FALSE)),
+                                model = FALSE, x = FALSE, y = FALSE)),
                 mw1 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = mw1,
-                              model = FALSE)),
+                              model = FALSE, x = FALSE, y = FALSE)),
                 mw2 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = mw2,
-                              model = FALSE)),
+                              model = FALSE, x = FALSE, y = FALSE)),
                 ow1 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = ow1,
-                              model = FALSE)),
+                              model = FALSE, x = FALSE, y = FALSE)),
                 ow2 = try(glm(formula = formula,
                               family = family,
                               data = data,
                               weights = ow2,
-                              model = FALSE))
+                              model = FALSE, x = FALSE, y = FALSE))
                 )
 
     data_frame(adjustment = names(lst),
