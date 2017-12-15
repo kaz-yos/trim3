@@ -368,7 +368,7 @@ prepare_data <- function(data,
     ## Add first-step GPS based on the entire cohort.
     data <- add_gps(data = data,
                     formula = formula1,
-                    family = VGAM::multinomial(parallel = FALSE),
+                    family = family,
                     ps_prefix = ps_prefix1)
 
     ## Trimming method and threshold configuration
