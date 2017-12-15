@@ -22,7 +22,7 @@
 ##' @export
 add_gps <- function(data,
                     formula,
-                    family = multinomial(parallel = FALSE),
+                    family = VGAM::multinomial(parallel = FALSE),
                     subset,
                     ps_prefix) {
     assertthat::assert_that("data.frame" %in% class(data))
@@ -368,7 +368,7 @@ prepare_data <- function(data,
     ## Add first-step GPS based on the entire cohort.
     data <- add_gps(data = data,
                     formula = formula1,
-                    family = multinomial(parallel = FALSE),
+                    family = VGAM::multinomial(parallel = FALSE),
                     ps_prefix = ps_prefix1)
 
     ## Trimming method and threshold configuration
@@ -404,7 +404,7 @@ prepare_data <- function(data,
         mutate(trimmed_data = map(trimmed_data, function(data) {
             add_gps(data = data,
                     formula = formula2,
-                    family = multinomial(parallel = FALSE),
+                    family = VGAM::multinomial(parallel = FALSE),
                     ps_prefix = ps_prefix2)
         }))
 
