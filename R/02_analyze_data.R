@@ -32,7 +32,6 @@ analyze_outcome_glm <- function(data, formula, family) {
                                 family = family,
                                 data = data,
                                 weights = iptw1,
-                                robust = TRUE,
                                 model = FALSE)),
                 iptw2 = try(glm(formula = formula,
                                 family = family,
