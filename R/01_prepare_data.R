@@ -192,7 +192,7 @@ trim_data <- function(data, trim_method_name, thres,
                       A_name, ps0_name, ps1_name, ps2_name,
                       levels) {
 
-    trim_fun <- get(paste0("trim_", trim_method))
+    trim_fun <- get(paste0("trim_", trim_method_name))
 
     data$keep <- trim_fun(A   = unlist(data[,A_name]),
                           ps0 = unlist(data[,ps0_name]),
