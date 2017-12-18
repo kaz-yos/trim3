@@ -15,7 +15,44 @@ coef_and_vcov <- function(model, vcov_fun) {
          vcov = vcov_matrix)
 }
 
-###   glm outcome analysis function.
+###  Data augmentation for counterfactual analyses
+##' Create an augmented dataset of counterfactuals
+##'
+##' .. content for details ..
+##'
+##' @param data data_frame containing outcome, treatment, counterfactual outcomes under each one of three treatment values (0,1,2).
+##' @param outcome_name name of the outcome variable.
+##' @param counter_names names of the three counterfactual outcome variables
+##' @param A_name name of the treatment variable
+##' @param A_levels three levels for the treatment variable
+##'
+##' @return data_frame that is three times larger containing counterfactual outcomes for each individuals
+##'
+##' @export
+augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A_levels) {
+
+    ## Clone
+    data0 <- data
+    data1 <- data
+    data2 <- data
+    ## Assign counterfactual outcomes
+    data0[,outcome_name] <- data0[,counter_names[1]]
+    data1[,outcome_name] <- data1[,counter_names[2]]
+    data2[,outcome_name] <- data2[,counter_names[3]]
+    ## Assign treatment
+    data0[,A_name] <- A_levels[1]
+    data1[,A_name] <- A_levels[2]
+    data2[,A_name] <- A_levels[3]
+    ## Combine into one
+    data_aug <- bind_rows(data0,
+                          data1,
+                          data2)
+
+    data_aug
+}
+
+
+###  glm outcome analysis function.
 ##' Analyze outcome using glm
 ##'
 ##' .. content for details ..
@@ -116,7 +153,7 @@ analyze_outcome_glm <- function(data, formula, family, data_aug) {
 }
 
 
-###   Calculate estimate, SE, CI for coxph object (robust se is used if available via vcov())
+###  Calculate estimate, SE, CI for coxph object (robust se is used if available via vcov())
 calc_est_ci <- function(model, vcov_fun, alpha) {
     ## Coefficients
     coefs <- coef(model)
