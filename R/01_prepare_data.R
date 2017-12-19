@@ -263,7 +263,7 @@ calculate_weight <- function(A, ps0, ps1, ps2, levels, weight_type) {
 ##' @export
 add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefix = "ps2_") {
 
-    ps1_names <- paste0("ps1_", levels)
+    ps1_names <- paste0(ps1_prefix, levels)
 
     data$iptw1 <- NA
     data[data$keep == 1,]$iptw1 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
@@ -287,7 +287,7 @@ add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefi
                                                   levels = levels,
                                                   weight_type = "ow")
 
-    ps2_names <- paste0("ps2_", levels)
+    ps2_names <- paste0(ps2_prefix, levels)
     ## Proceed if ps2_* are all available
     if (all(ps2_names %in% names(data))) {
 
