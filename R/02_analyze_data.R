@@ -26,10 +26,10 @@ coef_and_vcov <- function(model, vcov_fun) {
 ##' @param A_name name of the treatment variable
 ##' @param A_levels three levels for the treatment variable
 ##'
-##' @return data_frame that is three times larger containing counterfactual outcomes for each individuals
+##' @return data_frame that is three times larger containing counterfactual outcomes for each individuals, weights are calculated from the true PS.
 ##'
 ##' @export
-augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A_levels) {
+augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A_levels, ps1_prefix, ps2_prefix) {
 
     ## Clone
     data0 <- data
@@ -47,7 +47,35 @@ augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A
     data_aug <- bind_rows(data0,
                           data1,
                           data2)
-
+    ## Replace first-stage PS with true PS
+    ps1_names <- paste0(ps1_prefix, levels)
+    data[, ps1_names[1]] <- data[, "pA0"]
+    data[, ps1_names[2]] <- data[, "pA1"]
+    data[, ps1_names[3]] <- data[, "pA2"]
+    ## No need for re-estimated PS as they are true PS.
+    ## Calculate weights from the true PS
+    data$iptw1 <- calculate_weight(A = unlist(data[, A_name]),
+                                   ps0 = unlist(data[, ps1_names[1]]),
+                                   ps1 = unlist(data[, ps1_names[2]]),
+                                   ps2 = unlist(data[, ps1_names[3]]),
+                                   levels = levels,
+                                   weight_type = "iptw")
+    data$iptw2 <- data$iptw1
+    data$mw1 <- calculate_weight(A = unlist(data[, A_name]),
+                                 ps0 = unlist(data[, ps1_names[1]]),
+                                 ps1 = unlist(data[, ps1_names[2]]),
+                                 ps2 = unlist(data[, ps1_names[3]]),
+                                 levels = levels,
+                                 weight_type = "mw")
+    data$mw2 <- data$mw1
+    data$ow1 <- calculate_weight(A = unlist(data[, A_name]),
+                                 ps0 = unlist(data[, ps1_names[1]]),
+                                 ps1 = unlist(data[, ps1_names[2]]),
+                                 ps2 = unlist(data[, ps1_names[3]]),
+                                 levels = levels,
+                                 weight_type = "ow")
+    data$ow2 <- data$ow1
+    ## Return the completed data
     data_aug
 }
 
