@@ -255,15 +255,15 @@ calculate_weight <- function(A, ps0, ps1, ps2, levels, weight_type) {
 ##'
 ##' @inheritParams trim_none
 ##' @param data data_frame
-##' @param ps1_prefix Prefix for the PS estimated in the entire cohort.
-##' @param ps2_prefix Prefix for the PS estimated in the trimmed cohort.
+##' @param ps_prefix1 Prefix for the PS estimated in the entire cohort.
+##' @param ps_prefix2 Prefix for the PS estimated in the trimmed cohort.
 ##'
 ##' @return data_frame containing IPTW, MW, and OW estimated in the entire cohort as well as the trimmed cohort.
 ##'
 ##' @export
-add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefix = "ps2_") {
+add_all_weights <- function(data, A_name, levels, ps_prefix1 = "ps1_", ps_prefix2 = "ps2_") {
 
-    ps1_names <- paste0(ps1_prefix, levels)
+    ps1_names <- paste0(ps_prefix1, levels)
 
     data$iptw1 <- NA
     data[data$keep == 1,]$iptw1 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
@@ -287,7 +287,7 @@ add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefi
                                                   levels = levels,
                                                   weight_type = "ow")
 
-    ps2_names <- paste0(ps2_prefix, levels)
+    ps2_names <- paste0(ps_prefix2, levels)
     ## Proceed if ps2_* are all available
     if (all(ps2_names %in% names(data))) {
 
@@ -333,6 +333,7 @@ add_all_weights <- function(data, A_name, levels, ps1_prefix = "ps1_", ps2_prefi
 ##'
 ##' @param data data_frame
 ##' @param formula1 PS model formula for the entire cohort estimation.
+##' @param formula2 PS model formula for the trimmed cohort estimation.
 ##' @param family PS model family
 ##' @param ps_prefix1 PS variable prefix for the entire cohort estimation
 ##' @param ps_prefix2 PS variable prefix for the trimmed cohort estimation
@@ -393,8 +394,8 @@ prepare_data <- function(data,
             add_all_weights(data = data,
                             A_name = A_name,
                             levels = levels,
-                            ps1_prefix = ps1_prefix,
-                            ps2_prefix = ps2_prefix)
+                            ps_prefix1 = ps_prefix1,
+                            ps_prefix2 = ps_prefix2)
         }))
 
     ## Add matching id
