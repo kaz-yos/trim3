@@ -25,13 +25,14 @@ coef_and_vcov <- function(model, vcov_fun) {
 ##' @param counter_names names of the three counterfactual outcome variables
 ##' @param A_name name of the treatment variable
 ##' @param A_levels three levels for the treatment variable
+##' @param true_ps_names names of the three true PS variables
 ##' @param ps1_prefix Prefix for the PS estimated in the entire cohort
 ##' @param ps2_prefix Prefix for the PS estimated in the trimmed cohort
 ##'
 ##' @return data_frame that is three times larger containing counterfactual outcomes for each individuals, weights are calculated from the true PS.
 ##'
 ##' @export
-augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A_levels, ps1_prefix, ps2_prefix) {
+augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A_levels, true_ps_names, ps1_prefix, ps2_prefix) {
 
     ## Clone
     data0 <- data
@@ -51,9 +52,9 @@ augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A
                           data2)
     ## Replace first-stage PS with true PS
     ps1_names <- paste0(ps1_prefix, A_levels)
-    data[, ps1_names[1]] <- data[, "pA0"]
-    data[, ps1_names[2]] <- data[, "pA1"]
-    data[, ps1_names[3]] <- data[, "pA2"]
+    data[, ps1_names[1]] <- data[, true_ps_names[1]]
+    data[, ps1_names[2]] <- data[, true_ps_names[2]]
+    data[, ps1_names[3]] <- data[, true_ps_names[3]]
     ## No need for re-estimated PS as they are true PS.
     ## Calculate weights from the true PS
     data$iptw1 <- calculate_weight(A = unlist(data[, A_name]),
