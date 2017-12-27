@@ -82,7 +82,6 @@ augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A
     data_aug
 }
 
-
 ###  glm outcome analysis function.
 ##' Analyze outcome using glm
 ##'
@@ -179,8 +178,21 @@ analyze_outcome_glm <- function(data, formula, family, data_aug) {
 
     data_frame(adjustment = names(lst),
                ## List column
-               coef = lapply(lst, `[[`, "coef"),
-               vcov = lapply(lst, `[[`, "vcov"))
+               ## May receive error object
+               coef = lapply(lst, function(x) {
+                   if (is.error(x)) {
+                       return(x)
+                   } else {
+                       x[["coef"]]
+                   }
+               }),
+               vcov = lapply(lst, function(x) {
+                   if (is.error(x)) {
+                       return(x)
+                   } else {
+                       x[["vcov"]]
+                   }
+               }))
 }
 
 
