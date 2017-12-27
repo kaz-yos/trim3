@@ -52,32 +52,32 @@ augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A
                           data2)
     ## Replace first-stage PS with true PS
     ps1_names <- paste0(ps1_prefix, A_levels)
-    data[, ps1_names[1]] <- data[, true_ps_names[1]]
-    data[, ps1_names[2]] <- data[, true_ps_names[2]]
-    data[, ps1_names[3]] <- data[, true_ps_names[3]]
+    data_aug[, ps1_names[1]] <- data_aug[, true_ps_names[1]]
+    data_aug[, ps1_names[2]] <- data_aug[, true_ps_names[2]]
+    data_aug[, ps1_names[3]] <- data_aug[, true_ps_names[3]]
     ## No need for re-estimated PS as they are true PS.
     ## Calculate weights from the true PS
-    data$iptw1 <- calculate_weight(A = unlist(data[, A_name]),
-                                   ps0 = unlist(data[, ps1_names[1]]),
-                                   ps1 = unlist(data[, ps1_names[2]]),
-                                   ps2 = unlist(data[, ps1_names[3]]),
-                                   levels = A_levels,
-                                   weight_type = "iptw")
-    data$iptw2 <- data$iptw1
-    data$mw1 <- calculate_weight(A = unlist(data[, A_name]),
-                                 ps0 = unlist(data[, ps1_names[1]]),
-                                 ps1 = unlist(data[, ps1_names[2]]),
-                                 ps2 = unlist(data[, ps1_names[3]]),
-                                 levels = A_levels,
-                                 weight_type = "mw")
-    data$mw2 <- data$mw1
-    data$ow1 <- calculate_weight(A = unlist(data[, A_name]),
-                                 ps0 = unlist(data[, ps1_names[1]]),
-                                 ps1 = unlist(data[, ps1_names[2]]),
-                                 ps2 = unlist(data[, ps1_names[3]]),
-                                 levels = A_levels,
-                                 weight_type = "ow")
-    data$ow2 <- data$ow1
+    data_aug$iptw1 <- calculate_weight(A = unlist(data_aug[, A_name]),
+                                       ps0 = unlist(data_aug[, ps1_names[1]]),
+                                       ps1 = unlist(data_aug[, ps1_names[2]]),
+                                       ps2 = unlist(data_aug[, ps1_names[3]]),
+                                       levels = A_levels,
+                                       weight_type = "iptw")
+    data_aug$iptw2 <- data_aug$iptw1
+    data_aug$mw1 <- calculate_weight(A = unlist(data_aug[, A_name]),
+                                     ps0 = unlist(data_aug[, ps1_names[1]]),
+                                     ps1 = unlist(data_aug[, ps1_names[2]]),
+                                     ps2 = unlist(data_aug[, ps1_names[3]]),
+                                     levels = A_levels,
+                                     weight_type = "mw")
+    data_aug$mw2 <- data_aug$mw1
+    data_aug$ow1 <- calculate_weight(A = unlist(data_aug[, A_name]),
+                                     ps0 = unlist(data_aug[, ps1_names[1]]),
+                                     ps1 = unlist(data_aug[, ps1_names[2]]),
+                                     ps2 = unlist(data_aug[, ps1_names[3]]),
+                                     levels = A_levels,
+                                     weight_type = "ow")
+    data_aug$ow2 <- data_aug$ow1
     ## Return the completed data
     data_aug
 }
