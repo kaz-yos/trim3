@@ -25,16 +25,13 @@ coef_and_vcov <- function(model, vcov_fun) {
 ##' @param counter_names names of the three counterfactual outcome variables
 ##' @param A_name name of the treatment variable
 ##' @param A_levels three levels for the treatment variable
-##' @param true_ps_names names of the three true PS variables
-##' @param ps1_prefix Prefix for the PS estimated in the entire cohort
-##' @param ps2_prefix Prefix for the PS estimated in the trimmed cohort
 ##'
 ##' @return data_frame that is three times larger containing counterfactual outcomes for each individuals, weights are calculated from the true PS.
 ##'
 ##' @export
-augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A_levels, true_ps_names, ps1_prefix, ps2_prefix) {
+augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A_levels) {
 
-    ## Clone
+    ## Clone each individual three times
     data0 <- data
     data1 <- data
     data2 <- data
@@ -46,40 +43,10 @@ augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A
     data0[,A_name] <- A_levels[1]
     data1[,A_name] <- A_levels[2]
     data2[,A_name] <- A_levels[3]
-    ## Combine into one
-    data_aug <- bind_rows(data0,
-                          data1,
-                          data2)
-    ## Replace first-stage PS with true PS
-    ps1_names <- paste0(ps1_prefix, A_levels)
-    data_aug[, ps1_names[1]] <- data_aug[, true_ps_names[1]]
-    data_aug[, ps1_names[2]] <- data_aug[, true_ps_names[2]]
-    data_aug[, ps1_names[3]] <- data_aug[, true_ps_names[3]]
-    ## No need for re-estimated PS as they are true PS.
-    ## Calculate weights from the true PS
-    data_aug$iptw1 <- calculate_weight(A = unlist(data_aug[, A_name]),
-                                       ps0 = unlist(data_aug[, ps1_names[1]]),
-                                       ps1 = unlist(data_aug[, ps1_names[2]]),
-                                       ps2 = unlist(data_aug[, ps1_names[3]]),
-                                       levels = A_levels,
-                                       weight_type = "iptw")
-    data_aug$iptw2 <- data_aug$iptw1
-    data_aug$mw1 <- calculate_weight(A = unlist(data_aug[, A_name]),
-                                     ps0 = unlist(data_aug[, ps1_names[1]]),
-                                     ps1 = unlist(data_aug[, ps1_names[2]]),
-                                     ps2 = unlist(data_aug[, ps1_names[3]]),
-                                     levels = A_levels,
-                                     weight_type = "mw")
-    data_aug$mw2 <- data_aug$mw1
-    data_aug$ow1 <- calculate_weight(A = unlist(data_aug[, A_name]),
-                                     ps0 = unlist(data_aug[, ps1_names[1]]),
-                                     ps1 = unlist(data_aug[, ps1_names[2]]),
-                                     ps2 = unlist(data_aug[, ps1_names[3]]),
-                                     levels = A_levels,
-                                     weight_type = "ow")
-    data_aug$ow2 <- data_aug$ow1
-    ## Return the completed data
-    data_aug
+    ## Combine into one dataset
+    bind_rows(data0,
+              data1,
+              data2)
 }
 
 ###  glm outcome analysis function.
