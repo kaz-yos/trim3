@@ -13,7 +13,7 @@
 ##'
 ##' @param data data_frame
 ##' @param formula formula for PS model
-##' @param family default \code{multinomial(parallel = FALSE)}
+##' @param family \code{multinomial(parallel = FALSE)} should be used.
 ##' @param subset subset expression if estimating PS only for the subset
 ##' @param ps_prefix string used as the prefix. Use to distinguish the re-estimated PS from the original PS.
 ##'
