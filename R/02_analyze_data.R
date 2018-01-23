@@ -39,10 +39,10 @@ augment_counterfactuals <- function(data, outcome_name, counter_names, A_name, A
     data0[,outcome_name] <- data0[,counter_names[1]]
     data1[,outcome_name] <- data1[,counter_names[2]]
     data2[,outcome_name] <- data2[,counter_names[3]]
-    ## Assign treatment
-    data0[,A_name] <- A_levels[1]
-    data1[,A_name] <- A_levels[2]
-    data2[,A_name] <- A_levels[3]
+    ## Assign treatment. Protect against zero-row data_frames.
+    data0[,A_name] <- rep(A_levels[1], nrow(data))
+    data1[,A_name] <- rep(A_levels[2], nrow(data))
+    data2[,A_name] <- rep(A_levels[3], nrow(data))
     ## Combine into one dataset
     bind_rows(data0,
               data1,
