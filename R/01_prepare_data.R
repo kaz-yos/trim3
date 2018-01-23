@@ -47,18 +47,23 @@ add_gps <- function(data,
 
     if (is.error(res_vglm)) {
 
-        cat("## vglm errored. Checking for a design matrix rank deficiency.\n")
+        message("## vglm errored. Checking for a design matrix rank deficiency.\n")
         ## Design matrix
         X <- model.matrix(object = formula, data = data)
-        X_rank <- Matrix::rankMatrix(X)
+        ## X can have no rows, in which case Matrix::rankMatrix(X) fails
+        X_rank <- try(Matrix::rankMatrix(X))
         ## Look for columns that are linearly dependent.
-        for (i in seq_len(ncol(X))) {
-            if (X_rank == Matrix::rankMatrix(X[,-i])) {
-                cat("##  Dropping ", colnames(X)[i], " does not reduce rank.\n")
+        if (!is.error(X_rank)) {
+            for (i in seq_len(ncol(X))) {
+                if (X_rank == Matrix::rankMatrix(X[,-i])) {
+                    message("##  Dropping ", colnames(X)[i], " does not reduce rank.\n")
+                }
             }
+        } else {
+            message("## Matrix rank assessment errored. Possibly zero rows.\n")
         }
 
-        cat("## Returning data as is without adding PS..\n")
+        message("## Returning data as is without adding PS.\n")
         return(data)
 
     } else {
