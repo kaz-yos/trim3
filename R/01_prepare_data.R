@@ -55,7 +55,8 @@ add_gps <- function(data,
         ## Look for columns that are linearly dependent.
         if (!is.error(X_rank)) {
             for (i in seq_len(ncol(X))) {
-                if (X_rank == Matrix::rankMatrix(X[,-i])) {
+                ## drop = FALSE to avoid vector degeneration.
+                if (X_rank == Matrix::rankMatrix(X[, -i, drop = FALSE])) {
                     message("##  Dropping ", colnames(X)[i], " does not reduce rank.\n")
                 }
             }
