@@ -270,21 +270,21 @@ add_all_weights <- function(data, A_name, levels, ps_prefix1 = "ps1_", ps_prefix
 
     ps1_names <- paste0(ps_prefix1, levels)
 
-    data$iptw1 <- NA
+    data$iptw1 <- rep(as.numeric(NA), nrow(data))
     data[data$keep == 1,]$iptw1 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
                                                     ps0 = unlist(data[data$keep == 1, ps1_names[1]]),
                                                     ps1 = unlist(data[data$keep == 1, ps1_names[2]]),
                                                     ps2 = unlist(data[data$keep == 1, ps1_names[3]]),
                                                     levels = levels,
                                                     weight_type = "iptw")
-    data$mw1 <- NA
+    data$mw1 <- rep(as.numeric(NA), nrow(data))
     data[data$keep == 1,]$mw1 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
                                                   ps0 = unlist(data[data$keep == 1, ps1_names[1]]),
                                                   ps1 = unlist(data[data$keep == 1, ps1_names[2]]),
                                                   ps2 = unlist(data[data$keep == 1, ps1_names[3]]),
                                                   levels = levels,
                                                   weight_type = "mw")
-    data$ow1 <- NA
+    data$ow1 <- rep(as.numeric(NA), nrow(data))
     data[data$keep == 1,]$ow1 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
                                                   ps0 = unlist(data[data$keep == 1, ps1_names[1]]),
                                                   ps1 = unlist(data[data$keep == 1, ps1_names[2]]),
@@ -296,21 +296,21 @@ add_all_weights <- function(data, A_name, levels, ps_prefix1 = "ps1_", ps_prefix
     ## Proceed if ps2_* are all available
     if (all(ps2_names %in% names(data))) {
 
-        data$iptw2 <- NA
+        data$iptw2 <- rep(as.numeric(NA), nrow(data))
         data[data$keep == 1,]$iptw2 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
                                                         ps0 = unlist(data[data$keep == 1, ps2_names[1]]),
                                                         ps1 = unlist(data[data$keep == 1, ps2_names[2]]),
                                                         ps2 = unlist(data[data$keep == 1, ps2_names[3]]),
                                                         levels = levels,
                                                         weight_type = "iptw")
-        data$mw2 <- NA
+        data$mw2 <- rep(as.numeric(NA), nrow(data))
         data[data$keep == 1,]$mw2 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
                                                       ps0 = unlist(data[data$keep == 1, ps2_names[1]]),
                                                       ps1 = unlist(data[data$keep == 1, ps2_names[2]]),
                                                       ps2 = unlist(data[data$keep == 1, ps2_names[3]]),
                                                       levels = levels,
                                                       weight_type = "mw")
-        data$ow2 <- NA
+        data$ow2 <- rep(as.numeric(NA), nrow(data))
         data[data$keep == 1,]$ow2 <- calculate_weight(A = unlist(data[data$keep == 1, A_name]),
                                                       ps0 = unlist(data[data$keep == 1, ps2_names[1]]),
                                                       ps1 = unlist(data[data$keep == 1, ps2_names[2]]),
