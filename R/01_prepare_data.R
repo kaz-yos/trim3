@@ -246,7 +246,7 @@ calculate_weight <- function(A, ps0, ps1, ps2, levels, weight_type) {
 
     } else if (weight_type == "ow") {
         ## Overlap weights (OW)
-        return((ps0 * ps1 * ps2) * iptw)
+        return((1/(1/ps0 + 1/ps1 + 1/ps2)) * iptw)
 
     } else {
         stop("Invalid option for weight_type: ", weight_type)
