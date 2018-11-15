@@ -1,3 +1,5 @@
 .Rproj.user
 .Rhistory
 .RData
+/trim3.Rproj
+*.gz
